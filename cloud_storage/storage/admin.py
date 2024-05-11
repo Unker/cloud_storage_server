@@ -10,8 +10,11 @@ class UserStorageInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = "User Storage"
 
+
+# todo понять почему не отображается поле в админке
 class CustomUserAdmin(UserAdmin):
     inlines = [UserStorageInline]
+
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)

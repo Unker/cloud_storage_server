@@ -1,8 +1,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.idea
-db.sqlite3
+*.idea/
 migrations/
-venv
+venv/
 .env
+user_storage/
