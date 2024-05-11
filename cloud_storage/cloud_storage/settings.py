@@ -165,3 +165,5 @@ REST_FRAMEWORK = {
         'anon': '200/minute',
     }
 }
+
+AUTH_USER_MODEL = 'storage.UserStorage'

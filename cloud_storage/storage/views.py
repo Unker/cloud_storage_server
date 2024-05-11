@@ -26,6 +26,7 @@ def custom_login(request):
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
 
+@csrf_exempt
 def custom_register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
