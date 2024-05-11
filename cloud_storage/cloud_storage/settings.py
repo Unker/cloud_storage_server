@@ -163,7 +163,8 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'user': '600/minute',
         'anon': '200/minute',
-    }
+    },
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 AUTH_USER_MODEL = 'storage.UserStorage'
