@@ -15,3 +15,18 @@ Content-Type: application/json
   "username": "unker",
   "password": "11111111q"
 }
+
+###
+
+# создание пользователя
+POST {{baseApiUrl}}/register/
+Content-Type: application/json
+
+{
+  "username": "unker",
+  "email": "test@example.com",
+  "first_name": "Test",
+  "last_name": "User",
+  "password1": "testpassword",
+  "password2": "testpassword"
+}
