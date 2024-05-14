@@ -2,18 +2,45 @@
 
 @base = http://localhost:8000
 @baseApiUrl = http://localhost:8000/api
-# логирование
-GET {{baseApiUrl}}/login/
+
+# аутентификация
+GET {{base}}/accounts/login/
+
+###
+# POST {{base}}/accounts/login/
+# Content-Type: multipart/form-data
+
+# {
+#   "csrfmiddlewaretoken":"a7TqwTk2UzwEET6RWMA6TxgaEp2xZxM8",
+#   "username": "unker",
+#   "password": "11111111q"
+# }
 
 ###
 
-# логирование
+
+# 
+OPTIONS {{base}}/login/
+
+###
+
+# аутентификация
 POST {{baseApiUrl}}/login/
 Content-Type: application/json
 
 {
   "username": "unker",
   "password": "11111111q"
+}
+
+###
+
+# аутентификация
+POST {{base}}/logout/
+Content-Type: application/json
+
+{
+  "username": "unker"
 }
 
 ###

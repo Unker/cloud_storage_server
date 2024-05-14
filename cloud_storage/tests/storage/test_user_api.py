@@ -1,4 +1,3 @@
-from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 
 import pytest
@@ -38,47 +37,65 @@ def users(users_factory):
     return users_factory(_quantity=n_users)
 
 
-@pytest.mark.django_db
-def test_login_user(client, users):
-    """ проверка login пользователя """
-    username = users[0].username
-    password = 'password0'
-
-    response = client.get(reverse('custom_login'))
-    assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-
-    response = client.post(reverse('custom_login'),
-                            {
-                                'username': username,
-                                'password': 'badpass',
-                            },
-                        )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    response = client.post(reverse('custom_login'),
-                            {
-                                'username': username,
-                                'password': password,
-                            },
-                        )
-    assert response.status_code == status.HTTP_200_OK
-
-
 def get_error_list(html):
     ''' Находим все теги <ul> с классом "errorlist" '''
     soup = BeautifulSoup(html, 'html.parser')
     return soup.find_all('ul', class_='errorlist')
 
-def post_form_data(client, data):
+
+def post_form_data(client, url, data):
+    ''' Отправка формы '''
     content = encode_multipart('BoUnDaRyStRiNg', data)
     content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
-    return client.post(reverse('custom_register'), content, content_type=content_type)
+    return client.post(url, content, content_type=content_type)
 
+
+@pytest.mark.django_db
+def test_login_user(client, users):
+    """ проверка login пользователя """
+    url = '/accounts/login/'
+    username = users[0].username
+    password = 'password0'
+
+    #
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+
+    data = {
+        'username': username,
+        'password': 'badpass',
+    }
+    response = post_form_data(client, url, data)
+    assert response.status_code == status.HTTP_200_OK
+
+    error_lists = get_error_list(response.content)
+    assert len(error_lists) == 1
+
+    data = {
+        'username': username,
+        'password': password,
+    }
+    response = post_form_data(client, url, data)
+    assert response.status_code == status.HTTP_302_FOUND
+
+
+@pytest.mark.django_db
+def test_logout_user(client, users):
+    """ проверка logout пользователя """
+    url = '/accounts/logout/'
+    username = users[0].username
+    data = {
+        'username': username,
+    }
+
+    response = post_form_data(client, url, data)
+    assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
 def test_custom_register(client):
     """ проверка регистрации пользователя """
+    url = reverse('custom_register')
 
     data = {
         'username': 'testuser',
@@ -89,7 +106,7 @@ def test_custom_register(client):
         'password2': 'testpassword',
     }
 
-    response = post_form_data(client, data)
+    response = post_form_data(client, url, data)
     assert response.status_code == status.HTTP_200_OK
 
     error_lists = get_error_list(response.content)
@@ -102,7 +119,7 @@ def test_custom_register(client):
     # Пытаемся создать пользователя с тем же username
     data2 = data.copy()
     data2["email"] = 'test2@example.com'
-    response = post_form_data(client, data2)
+    response = post_form_data(client, url, data2)
     assert response.status_code == status.HTTP_200_OK
     error_lists = get_error_list(response.content)
     assert len(error_lists) == 1
@@ -113,7 +130,7 @@ def test_custom_register(client):
     # Пытаемся создать пользователя с тем же email
     data3 = data.copy()
     data3["username"] = 'testuser2'
-    response = post_form_data(client, data3)
+    response = post_form_data(client, url, data3)
     assert response.status_code == status.HTTP_200_OK
     error_lists = get_error_list(response.content)
     assert len(error_lists) == 1
@@ -129,7 +146,7 @@ def test_custom_register(client):
         'password2': 'wrongpassword',
     }
 
-    response = post_form_data(client, data4)
+    response = post_form_data(client, url, data4)
     assert response.status_code == status.HTTP_200_OK
     error_lists = get_error_list(response.content)
     assert len(error_lists) == 1
