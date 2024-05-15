@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 
 import pytest
 from django.contrib.auth.hashers import make_password
+from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from model_bakery import baker
 from rest_framework.test import APIClient
@@ -150,3 +151,24 @@ def test_custom_register(client):
     assert response.status_code == status.HTTP_200_OK
     error_lists = get_error_list(response.content)
     assert len(error_lists) == 1
+
+
+@pytest.mark.django_db
+def test_get_users(client, users):
+    """ проверка получения списка пользователей """
+    url = '/users/?page=1'
+    # header = {
+    #     'Authorization': 'Token 7fcf74524c7bc3509f0bede2e93dca1723172718',
+    # }
+
+    # token = Token.objects.get(user__username=users[0].username)
+    admin = UserStorage.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
+    token = Token.objects.create(user=admin)
+
+    response = client.get(url)
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    # client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+    response = client.get(url, HTTP_AUTHORIZATION='Token ' + token.key)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['count'] == UserStorage.objects.all().count()

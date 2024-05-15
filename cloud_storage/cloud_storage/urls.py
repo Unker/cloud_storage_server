@@ -16,14 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
 
 from storage.views import custom_register
 
+from storage.views import UserViewSet
+
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet, basename="users")
 
 urlpatterns = [
+    path('', include(router.urls)),
     path("admin/", admin.site.urls),
-
     path('accounts/', include('django.contrib.auth.urls')),
 
-    path('api/register/', custom_register, name='custom_register'),
+    path('accounts/register/', custom_register, name='custom_register'),
 ]
