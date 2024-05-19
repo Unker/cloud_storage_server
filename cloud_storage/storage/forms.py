@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 
 from .models import UserStorage
+from cloud_storage.settings import STORAGE_PATH
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -45,7 +46,7 @@ class CustomUserCreationForm(UserCreationForm):
 
     def save(self, commit=True):
         # создадим каталог хранилища пользователя
-        user_storage_path = os.path.join('user_storage', self.cleaned_data['username'])
+        user_storage_path = os.path.join(STORAGE_PATH, self.cleaned_data['username'])
         os.makedirs(user_storage_path, exist_ok=True)
 
         # создадим пользователя

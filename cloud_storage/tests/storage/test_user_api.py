@@ -1,41 +1,12 @@
 from bs4 import BeautifulSoup
 
 import pytest
-from django.contrib.auth.hashers import make_password
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
-from model_bakery import baker
-from rest_framework.test import APIClient
 from rest_framework import status
 from django.test.client import encode_multipart
 
 from storage.models import UserStorage
-
-
-@pytest.fixture
-def client():
-    return APIClient()
-
-
-@pytest.fixture
-def users_factory():
-    def factory(count_users=5, *args, **kwargs):
-        users_set = baker.prepare(UserStorage, _quantity=count_users)
-
-        # Хешируем пароли для каждого пользователя
-        for idx, user in enumerate(users_set, start=0):
-            # Создаем пароли для пользователей в виде строк "password1", "password2" и т.д.
-            user.password = make_password(f'password{idx}')
-            user.save()
-        return users_set
-
-    return factory
-
-
-@pytest.fixture
-def users(users_factory):
-    n_users = 10
-    return users_factory(_quantity=n_users)
 
 
 def get_error_list(html):

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from storage.models import UserStorage
+from storage.models import UserStorage, StorageFiles
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -15,3 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
             'is_staff',
             'is_superuser',
         ]
+
+class StorageFilesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StorageFiles
+        fields = '__all__'
+        read_only_fields = ['size', 'upload_date', 'last_update_date', 'short_link']
