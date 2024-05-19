@@ -1,3 +1,4 @@
+from django.http import HttpResponse, Http404
 from django.middleware.csrf import get_token
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -6,6 +7,7 @@ from rest_framework.decorators import action, api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.utils import timezone
 from rest_framework.viewsets import ModelViewSet
 
 from .forms import CustomUserCreationForm
@@ -54,6 +56,12 @@ class StorageFilesViewSet(ModelViewSet):
             return StorageFiles.objects.filter(owner_id=storage_user_id)
         return StorageFiles.objects.filter(owner=user)
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
+
     @action(detail=False, methods=['get'])
     def by_user(self, request, pk=None):
         # маршрут будет доступен по URL-пути storagefiles/by_user/?user_id=1
@@ -75,3 +83,18 @@ class StorageFilesViewSet(ModelViewSet):
         file = self.get_object()
         file.generate_short_link()
         return Response({'short_link': file.short_link}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='download/(?P<short_link>[^/.]+)')
+    def download_by_short_link(self, request, short_link=None):
+        try:
+            file_record = StorageFiles.objects.get(short_link=short_link)
+            file_record.last_download_date = timezone.now()
+            file_record.save()
+
+            file_path = file_record.file.path
+            with open(file_path, 'rb') as file:
+                response = HttpResponse(file.read(), content_type='application/octet-stream')
+                response['Content-Disposition'] = f'attachment; filename={file_record.original_name}'
+                return response
+        except StorageFiles.DoesNotExist:
+            raise Http404("File not found")
