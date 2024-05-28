@@ -9,6 +9,7 @@ from storage.models import UserStorage, StorageFiles
 
 @pytest.fixture
 def storage_files(users):
+    '''генератор файлов для пользователей'''
     files = []
     for user in users:
         user_files = baker.make(StorageFiles, owner=user, _quantity=2)
@@ -38,10 +39,10 @@ def test_get_queryset_superuser(client, users, admin_user, storage_files):
     assert response.data['count'] == 2
 
 @pytest.mark.django_db
-def test_by_user(client, users, storage_files):
+def test_by_user(client, users, admin_user, storage_files):
     '''проверяет работу эндпоинта by_user с параметром user_id'''
     user = users[0]
-    client = client.login(user)
+    client =  client.login(admin_user)
     response = client.get(reverse('storagefiles-by-user'), {'user_id': user.id})
     assert response.status_code == status.HTTP_200_OK
     assert response.data['count'] == 2
@@ -154,7 +155,7 @@ def test_partial_update_file(client, users, storage_files):
 def test_delete_file(client, users, storage_files):
     '''Проверка удаления файла'''
     user = users[0]
-    # file = storage_files[0]
+    # file = users_files[0]
     client = client.login(user)
     url = reverse('storagefiles-list')
 

@@ -1,13 +1,15 @@
+import os
+
 from django.http import HttpResponse, Http404
 from django.middleware.csrf import get_token
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.utils import timezone
 from rest_framework.viewsets import ModelViewSet
 
 from .forms import CustomUserCreationForm
@@ -52,7 +54,7 @@ class StorageFilesViewSet(ModelViewSet):
         user = self.request.user
         storage_user_id = self.request.query_params.get('user_id')
 
-        if user.is_superuser and storage_user_id:
+        if (user.is_staff or user.is_superuser) and storage_user_id:
             return StorageFiles.objects.filter(owner_id=storage_user_id)
         return StorageFiles.objects.filter(owner=user)
 
@@ -65,6 +67,9 @@ class StorageFilesViewSet(ModelViewSet):
     @action(detail=False, methods=['get'])
     def by_user(self, request, pk=None):
         # маршрут будет доступен по URL-пути storagefiles/by_user/?user_id=1
+        if not request.user.is_staff and not request.user.is_superuser:
+            return redirect('/')
+
         user_id = request.query_params.get('user_id')
         if user_id:
             files = StorageFiles.objects.filter(owner_id=user_id)
@@ -98,3 +103,14 @@ class StorageFilesViewSet(ModelViewSet):
                 return response
         except StorageFiles.DoesNotExist:
             raise Http404("File not found")
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        file_path = instance.file.path
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        instance.delete()
