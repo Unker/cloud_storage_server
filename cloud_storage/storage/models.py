@@ -20,7 +20,7 @@ class UserStorage(AbstractUser):
 
 def user_directory_path(instance, filename):
     # file will be uploaded to STORAGE_PATH/<username>/<filename>
-    return os.path.join(STORAGE_PATH, instance.owner.username, filename)
+    return os.path.join(instance.owner.username, filename)
 
 class StorageFiles(models.Model):
     '''Файлы пользователя'''
@@ -42,7 +42,8 @@ class StorageFiles(models.Model):
             self.owner = kwargs.pop('owner')
         if self.file:
             self.size = self.file.size
-            self.original_name = self.file.name
+            if self.original_name == '':
+                self.original_name = self.file.name
         super(StorageFiles, self).save(*args, **kwargs)
 
     def __str__(self):

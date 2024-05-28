@@ -151,6 +151,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 STORAGE_PATH = env('STORAGE_PATH')
 
+# Основной URL для медиафайлов
+MEDIA_URL = f"/{env('STORAGE_PATH')}/"
+
+# Корневая директория для медиафайлов
+MEDIA_ROOT = os.path.join(BASE_DIR, env('STORAGE_PATH'))
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
