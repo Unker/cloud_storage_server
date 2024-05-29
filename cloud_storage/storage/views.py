@@ -52,10 +52,8 @@ class StorageFilesViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        storage_user_id = self.request.query_params.get('user_id')
-
-        if (user.is_staff or user.is_superuser) and storage_user_id:
-            return StorageFiles.objects.filter(owner_id=storage_user_id)
+        if user.is_superuser or user.is_staff:
+            return StorageFiles.objects.all()
         return StorageFiles.objects.filter(owner=user)
 
     def perform_create(self, serializer):
