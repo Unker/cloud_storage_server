@@ -30,6 +30,19 @@ def test_get_queryset(client, users, storage_files):
 
 
 @pytest.mark.django_db
+def test_access_file_without_permission(client, users, storage_files):
+    """Проверка доступа к файлу без разрешения"""
+    user = users[1]  # Different user
+    file = storage_files[0]
+    client.login(user)
+    url = reverse('storagefiles-detail', kwargs={'pk': file.id})
+
+    response = client.get(url)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert "No StorageFiles matches the given query." in response.data['detail']
+
+
+@pytest.mark.django_db
 def test_get_queryset_superuser(client, users, admin_user, storage_files):
     """
     Проверяет, что суперпользователь может получить файлы
@@ -70,7 +83,7 @@ def test_generate_short_link(client, users, storage_files):
 
 
 @pytest.mark.django_db
-def test_create_file(client, users, storage_files):
+def test_create_file(client, users, storage_files, cleanup):
     """Проверка создания нового файла"""
     user = users[0]
     client = client.login(user)
@@ -113,10 +126,37 @@ def test_create_file(client, users, storage_files):
     # Проверка, что файл действительно создан
     file_path = new_file.file.path
     assert os.path.exists(file_path)
+    cleanup(user.username)
 
 
 @pytest.mark.django_db
-def test_update_file(client, users, storage_files):
+def test_create_file_with_invalid_data(client, users):
+    """Проверка создания файла с недопустимыми данными"""
+    user = users[0]
+    client.login(user)
+    url = reverse('storagefiles-list')
+
+    # Omit the file field entirely to simulate invalid data
+    data = {
+        'comment': 'test-comment'
+    }
+
+    response = client.post(url, data, format='multipart')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    # Pass an invalid file-like object
+    invalid_file = SimpleUploadedFile("invalid.txt", b"", content_type="text/plain")
+    data = {
+        'comment': 'test-comment',
+        'file': invalid_file
+    }
+
+    response = client.post(url, data, format='multipart')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_update_file(client, users, storage_files, cleanup):
     """Проверка обновления информации о файле"""
     user = users[0]
     file = storage_files[0]
@@ -135,10 +175,11 @@ def test_update_file(client, users, storage_files):
     assert response.data['comment'] == data['comment']
     file.refresh_from_db()
     assert file.comment == data['comment']
+    cleanup(user.username)
 
 
 @pytest.mark.django_db
-def test_partial_update_file(client, users, storage_files):
+def test_partial_update_file(client, users, storage_files, cleanup):
     """Проверка частичного обновления информации о файле"""
     user = users[0]
     file = storage_files[0]
@@ -154,13 +195,13 @@ def test_partial_update_file(client, users, storage_files):
     assert response.data['comment'] == data['comment']
     file.refresh_from_db()
     assert file.comment == data['comment']
+    cleanup(user.username)
 
 
 @pytest.mark.django_db
 def test_delete_file(client, users, storage_files):
     """Проверка удаления файла"""
     user = users[0]
-    # file = users_files[0]
     client = client.login(user)
     url = reverse('storagefiles-list')
 
