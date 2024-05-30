@@ -62,6 +62,15 @@ class StorageFilesViewSet(ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        file = request.data.get('file', None)
+        if file is None:
+            return Response(
+                {"detail": "File field cannot be null."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().create(request, *args, **kwargs)
+
     @action(detail=False, methods=['get'])
     def by_user(self, request, pk=None):
         # маршрут будет доступен по URL-пути storagefiles/by_user/?user_id=1
