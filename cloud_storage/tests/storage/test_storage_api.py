@@ -7,9 +7,10 @@ from rest_framework import status
 from model_bakery import baker
 from storage.models import UserStorage, StorageFiles
 
+
 @pytest.fixture
 def storage_files(users):
-    '''генератор файлов для пользователей'''
+    """Генератор файлов для пользователей"""
     files = []
     for user in users:
         user_files = baker.make(StorageFiles, owner=user, _quantity=2)
@@ -19,7 +20,7 @@ def storage_files(users):
 
 @pytest.mark.django_db
 def test_get_queryset(client, users, storage_files):
-    '''проверяет, что аутентифицированный пользователь получает только свои файлы'''
+    """Проверяет, что аутентифицированный пользователь получает только свои файлы"""
     user = users[0]
     client.login(user)
     response = client.get(reverse('storagefiles-list'))
@@ -27,20 +28,22 @@ def test_get_queryset(client, users, storage_files):
     assert response.data['count'] == 2
     assert len(response.data['results']) == 2
 
+
 @pytest.mark.django_db
 def test_get_queryset_superuser(client, users, admin_user, storage_files):
-    '''
+    """
     Проверяет, что суперпользователь может получить файлы
     другого пользователя, указав user_id.
-    '''
+    """
     client.login(admin_user)
     response = client.get(reverse('storagefiles-list'))
     assert response.status_code == status.HTTP_200_OK
     assert response.data['count'] == len(storage_files)
 
+
 @pytest.mark.django_db
 def test_by_user(client, users, admin_user, storage_files):
-    '''проверяет работу эндпоинта by_user с параметром user_id'''
+    """проверяет работу эндпоинта by_user с параметром user_id"""
     user = users[0]
     client =  client.login(admin_user)
     response = client.get(reverse('storagefiles-by-user'), {'user_id': user.id})
@@ -51,9 +54,10 @@ def test_by_user(client, users, admin_user, storage_files):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data['detail'] == 'user_id parameter is required'
 
+
 @pytest.mark.django_db
 def test_generate_short_link(client, users, storage_files):
-    '''Проверка генерации короткой ссылки для файла'''
+    """Проверка генерации короткой ссылки для файла"""
     user = users[0]
     file = storage_files[0]
     client = client.login(user)
@@ -67,7 +71,7 @@ def test_generate_short_link(client, users, storage_files):
 
 @pytest.mark.django_db
 def test_create_file(client, users, storage_files):
-    '''Проверка создания нового файла'''
+    """Проверка создания нового файла"""
     user = users[0]
     client = client.login(user)
     url = reverse('storagefiles-list')
@@ -75,7 +79,7 @@ def test_create_file(client, users, storage_files):
     file = SimpleUploadedFile("testfile.txt", b"file_content", content_type="text/plain")
 
     data = {
-        'comment': 'testcomment',
+        'comment': 'test-comment',
         'file': file,
     }
 
@@ -90,29 +94,30 @@ def test_create_file(client, users, storage_files):
     # проверяем ответ от сервера
     assert response.data['original_name'] == file.name
     assert response.data['owner'] == user.id
-    assert response.data['file'] != None
+    assert response.data['file'] is not None
     assert response.data['size'] == file.size
-    assert response.data['upload_date'] != None
-    assert response.data['last_update_date'] != None
+    assert response.data['upload_date'] is not None
+    assert response.data['last_update_date'] is not None
     assert response.data['comment'] == data['comment']
 
     # проверяем содержимое БД
     new_file = StorageFiles.objects.latest('id')
     assert new_file.original_name == file.name
     assert new_file.owner.id == user.id
-    assert new_file.file != None
+    assert new_file.file is not None
     assert new_file.size == file.size
-    assert new_file.upload_date != None
-    assert new_file.last_update_date != None
+    assert new_file.upload_date is not None
+    assert new_file.last_update_date is not None
     assert new_file.comment == data['comment']
 
     # Проверка, что файл действительно создан
     file_path = new_file.file.path
     assert os.path.exists(file_path)
 
+
 @pytest.mark.django_db
 def test_update_file(client, users, storage_files):
-    '''Проверка обновления информации о файле'''
+    """Проверка обновления информации о файле"""
     user = users[0]
     file = storage_files[0]
     client = client.login(user)
@@ -121,7 +126,7 @@ def test_update_file(client, users, storage_files):
     new_file = SimpleUploadedFile("testfile.txt", b"file_content", content_type="text/plain")
 
     data = {
-        'comment': 'testcomment',
+        'comment': 'test-comment',
         'file': new_file,
     }
 
@@ -134,14 +139,14 @@ def test_update_file(client, users, storage_files):
 
 @pytest.mark.django_db
 def test_partial_update_file(client, users, storage_files):
-    '''Проверка частичного обновления информации о файле'''
+    """Проверка частичного обновления информации о файле"""
     user = users[0]
     file = storage_files[0]
     client = client.login(user)
     url = reverse('storagefiles-detail', kwargs={'pk': file.id})
 
     data = {
-        'comment': 'newcomment'
+        'comment': 'new comment'
     }
 
     response = client.patch(url, data)
@@ -153,7 +158,7 @@ def test_partial_update_file(client, users, storage_files):
 
 @pytest.mark.django_db
 def test_delete_file(client, users, storage_files):
-    '''Проверка удаления файла'''
+    """Проверка удаления файла"""
     user = users[0]
     # file = users_files[0]
     client = client.login(user)
@@ -162,7 +167,7 @@ def test_delete_file(client, users, storage_files):
     file = SimpleUploadedFile("testfile.txt", b"file_content", content_type="text/plain")
 
     data = {
-        'comment': 'testcomment',
+        'comment': 'test-comment',
         'file': file,
     }
 
