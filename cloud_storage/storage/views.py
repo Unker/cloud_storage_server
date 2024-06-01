@@ -1,4 +1,5 @@
 import os
+import logging
 
 from django.http import HttpResponse, Http404
 from django.middleware.csrf import get_token
@@ -16,6 +17,8 @@ from .forms import CustomUserCreationForm
 from .models import UserStorage, StorageFiles
 from .serializers import UserSerializer, StorageFilesSerializer
 
+
+logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 def csrf_token_view(request):
@@ -52,6 +55,7 @@ class StorageFilesViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        logger.debug(f"{self.__class__.__name__} user={user} request={self.request}")
         if user.is_superuser or user.is_staff:
             return StorageFiles.objects.all()
         return StorageFiles.objects.filter(owner=user)
