@@ -67,10 +67,12 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8080",
-    'http://'+CORS_ALLOWED_HOSTS,
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://127.0.0.1:8080",
+#     'http://'+CORS_ALLOWED_HOSTS,
+# ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "cloud_storage.urls"
 
@@ -180,7 +182,7 @@ REST_FRAMEWORK = {
     },
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 20,
+    'PAGE_SIZE': 2,#20,
 }
 
 AUTH_USER_MODEL = 'storage.UserStorage'
