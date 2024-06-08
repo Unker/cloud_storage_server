@@ -74,15 +74,15 @@ def test_custom_register(client):
         'email': 'test@example.com',
         'first_name': 'FirstName',
         'last_name': 'LastName',
-        'password1': 'testpassword',
-        'password2': 'testpassword',
+        'password1': 'Test_password1',
+        'password2': 'Test_password1',
     }
 
     response = post_form_data(client, url, data)
     assert response.status_code == status.HTTP_200_OK
 
-    error_lists = get_error_list(response.content)
-    assert len(error_lists) == 0
+    json_response = response.json()
+    assert json_response['status'] == 'success'
 
     # Проверяем, что пользователь создался
     assert UserStorage.objects.filter(username=data['username']).exists()
@@ -92,9 +92,13 @@ def test_custom_register(client):
     data2 = data.copy()
     data2["email"] = 'test2@example.com'
     response = post_form_data(client, url, data2)
-    assert response.status_code == status.HTTP_200_OK
-    error_lists = get_error_list(response.content)
-    assert len(error_lists) == 1
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    json_response = response.json()
+    assert json_response['status'] == 'error'
+    assert 'errors' in json_response
+    assert 'username' in json_response['errors']
+
     # Проверяем, что пользователь не создался
     assert not UserStorage.objects.filter(email=data2['email']).exists()
 
@@ -103,9 +107,12 @@ def test_custom_register(client):
     data3 = data.copy()
     data3["username"] = 'testuser2'
     response = post_form_data(client, url, data3)
-    assert response.status_code == status.HTTP_200_OK
-    error_lists = get_error_list(response.content)
-    assert len(error_lists) == 1
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    json_response = response.json()
+    assert json_response['status'] == 'error'
+    assert 'errors' in json_response
+    assert 'email' in json_response['errors']
 
 
     # не совпадают пароли
@@ -119,9 +126,12 @@ def test_custom_register(client):
     }
 
     response = post_form_data(client, url, data4)
-    assert response.status_code == status.HTTP_200_OK
-    error_lists = get_error_list(response.content)
-    assert len(error_lists) == 1
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    json_response = response.json()
+    assert json_response['status'] == 'error'
+    assert 'errors' in json_response
+    assert 'password2' in json_response['errors']
 
 
 @pytest.mark.django_db

@@ -1,7 +1,7 @@
 import os
 import logging
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -20,6 +20,8 @@ from .serializers import UserSerializer, StorageFilesSerializer
 
 logger = logging.getLogger(__name__)
 
+
+@csrf_exempt
 @api_view(['GET'])
 def csrf_token_view(request):
     return Response({'csrfToken': get_token(request)})
@@ -32,17 +34,22 @@ def custom_register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
+            return JsonResponse({'status': 'success', 'message': 'User registered successfully'})
+        else:
+            errors = form.errors.as_json()
+            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
     else:
         form = CustomUserCreationForm()
-    context = {
-        'form':form
-    }
-    return render(request, 'register.html', context)
+        context = {
+            'form': form
+        }
+        return render(request, 'register.html', context)
 
 
 class UserViewSet(ModelViewSet):
     '''Работа с профилями пользователей'''
     permission_classes = [IsAdminUser]
+    # permission_classes = [AllowAny]
     queryset = UserStorage.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
