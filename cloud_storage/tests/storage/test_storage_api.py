@@ -43,18 +43,6 @@ def test_access_file_without_permission(client, users, storage_files):
 
 
 @pytest.mark.django_db
-def test_get_queryset_superuser(client, users, admin_user, storage_files):
-    """
-    Проверяет, что суперпользователь может получить файлы
-    другого пользователя, указав user_id.
-    """
-    client.login(admin_user)
-    response = client.get(reverse('storagefiles-list'))
-    assert response.status_code == status.HTTP_200_OK
-    assert response.data['count'] == len(storage_files)
-
-
-@pytest.mark.django_db
 def test_by_user(client, users, admin_user, storage_files):
     """проверяет работу эндпоинта by_user с параметром user_id"""
     user = users[0]

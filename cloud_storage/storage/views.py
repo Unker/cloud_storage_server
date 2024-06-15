@@ -7,9 +7,11 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -27,6 +29,17 @@ def csrf_token_view(request):
     return Response({'csrfToken': get_token(request)})
 
 
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super(CustomAuthToken, self).post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        user = token.user
+        return Response({
+            'token': token.key,
+            'user_id': user.id,
+            'is_staff': user.is_staff,
+            'username': user.username,
+        })
 @csrf_exempt
 def custom_register(request):
     """ регистрация пользователя """
@@ -63,6 +76,8 @@ class StorageFilesViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         logger.debug(f"{self.__class__.__name__} user={user} request={self.request}")
+        if (self.request.method not in SAFE_METHODS) and (user.is_superuser or user.is_staff):
+            return StorageFiles.objects.all()
         return StorageFiles.objects.filter(owner=user)
 
     def perform_create(self, serializer):
