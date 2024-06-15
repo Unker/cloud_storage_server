@@ -29,7 +29,7 @@ def csrf_token_view(request):
 
 @csrf_exempt
 def custom_register(request):
-    ''' регистрация пользователя '''
+    """ регистрация пользователя """
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -47,7 +47,7 @@ def custom_register(request):
 
 
 class UserViewSet(ModelViewSet):
-    '''Работа с профилями пользователей'''
+    """Работа с профилями пользователей"""
     permission_classes = [IsAdminUser]
     # permission_classes = [AllowAny]
     queryset = UserStorage.objects.all()
@@ -63,8 +63,6 @@ class StorageFilesViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         logger.debug(f"{self.__class__.__name__} user={user} request={self.request}")
-        if user.is_superuser or user.is_staff:
-            return StorageFiles.objects.all()
         return StorageFiles.objects.filter(owner=user)
 
     def perform_create(self, serializer):
