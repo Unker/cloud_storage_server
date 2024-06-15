@@ -74,10 +74,18 @@ CORS_ALLOWED_ORIGINS = [
     'http://'+CORS_ALLOWED_HOSTS,
 ]
 
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+
 # CORS_ALLOW_ALL_ORIGINS = True
 
 # Allow credentials to be included in the requests
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+    'x-csrftoken',
+]
 
 ROOT_URLCONF = "cloud_storage.urls"
 
@@ -160,6 +168,8 @@ MEDIA_URL = f"/{env('STORAGE_PATH')}/"
 
 # Корневая директория для медиафайлов
 MEDIA_ROOT = os.path.join(BASE_DIR, env('STORAGE_PATH'))
+
+APPEND_SLASH=False
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
