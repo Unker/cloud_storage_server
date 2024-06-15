@@ -9,6 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'email',
+            'username',
             'first_name',
             'last_name',
             'is_active',
@@ -35,5 +36,5 @@ class StorageFilesSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        validated_data['owner'] = self.context['request'].user
+        validated_data['owner'] = instance.owner
         return super().update(instance, validated_data)

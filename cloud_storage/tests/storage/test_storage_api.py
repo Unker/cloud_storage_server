@@ -156,11 +156,12 @@ def test_create_file_with_invalid_data(client, users):
 
 
 @pytest.mark.django_db
-def test_update_file(client, users, storage_files, cleanup):
+def test_update_file(client, users, admin_user, storage_files, cleanup):
     """Проверка обновления информации о файле"""
     user = users[0]
+    other_user = users[1]
     file = storage_files[0]
-    client = client.login(user)
+    client_user = client.login(user)
     url = reverse('storagefiles-detail', kwargs={'pk': file.id})
 
     new_file = SimpleUploadedFile("testfile.txt", b"file_content", content_type="text/plain")
@@ -170,11 +171,37 @@ def test_update_file(client, users, storage_files, cleanup):
         'file': new_file,
     }
 
-    response = client.put(url, data, format='multipart')
+    # Проверка обновления файла самим пользователем
+    response = client_user.put(url, data, format='multipart')
     assert response.status_code == status.HTTP_200_OK
     assert response.data['comment'] == data['comment']
     file.refresh_from_db()
     assert file.comment == data['comment']
+
+    # Обновление данных для следующего запроса
+    data['file'] = SimpleUploadedFile("testfile.txt", b"file_content", content_type="text/plain")
+    admin_comment = 'admin-test-comment'
+    data['comment'] = admin_comment
+
+    # Проверка обновления файла администратором
+    client_admin = client.login(admin_user)
+    response = client_admin.put(url, data, format='multipart')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['comment'] == data['comment']
+    file.refresh_from_db()
+    assert file.comment == data['comment']
+
+    # Обновление данных для следующего запроса
+    data['file'] = SimpleUploadedFile("testfile.txt", b"file_content", content_type="text/plain")
+    data['comment'] = 'other_user-test-comment'
+
+    # Проверка запрета обновления файла другим пользователем
+    client_other_user = client.login(other_user)
+    response = client_other_user.put(url, data, format='multipart')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    file.refresh_from_db()
+    assert file.comment == admin_comment
+
     cleanup(user.username)
 
 
