@@ -38,6 +38,7 @@ class CustomAuthToken(ObtainAuthToken):
             'token': token.key,
             'user_id': user.id,
             'is_staff': user.is_staff,
+            'is_superuser': user.is_superuser,
             'username': user.username,
         })
 @csrf_exempt
