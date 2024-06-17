@@ -17,6 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_superuser',
         ]
 
+
 class StorageFilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageFiles

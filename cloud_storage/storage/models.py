@@ -52,3 +52,7 @@ class StorageFiles(models.Model):
     def generate_short_link(self):
         self.short_link = shortuuid.uuid()
         self.save()
+
+    def delete_short_link(self):
+        self.short_link = None
+        self.save()

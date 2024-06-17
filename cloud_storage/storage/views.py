@@ -121,6 +121,13 @@ class StorageFilesViewSet(ModelViewSet):
         file.generate_short_link()
         return Response({'short_link': file.short_link}, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post'])
+    def delete_short_link(self, request, pk=None):
+        # эндпоинт /storagefiles/<id>/delete_short_link/
+        file = self.get_object()
+        file.delete_short_link()
+        return Response({'short_link': file.short_link}, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['get'], url_path='download/(?P<short_link>[^/.]+)')
     def download_by_short_link(self, request, short_link=None):
         try:
