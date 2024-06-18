@@ -1,7 +1,7 @@
 import os
 import logging
 
-from django.http import HttpResponse, Http404, JsonResponse
+from django.http import HttpResponse, Http404, JsonResponse, FileResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -18,7 +18,7 @@ from rest_framework.viewsets import ModelViewSet
 from .forms import CustomUserCreationForm
 from .models import UserStorage, StorageFiles
 from .serializers import UserSerializer, StorageFilesSerializer
-
+from .decorators import handle_file_download
 
 logger = logging.getLogger(__name__)
 
@@ -128,20 +128,22 @@ class StorageFilesViewSet(ModelViewSet):
         file.delete_short_link()
         return Response({'short_link': file.short_link}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], url_path='download/(?P<short_link>[^/.]+)')
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='download/(?P<short_link>[^/.]+)',
+        permission_classes=[AllowAny],
+    )
+    @handle_file_download
     def download_by_short_link(self, request, short_link=None):
-        try:
-            file_record = StorageFiles.objects.get(short_link=short_link)
-            file_record.last_download_date = timezone.now()
-            file_record.save()
+        """This function downloads a file by short_link"""
+        return StorageFiles.objects.get(short_link=short_link)
 
-            file_path = file_record.file.path
-            with open(file_path, 'rb') as file:
-                response = HttpResponse(file.read(), content_type='application/octet-stream')
-                response['Content-Disposition'] = f'attachment; filename={file_record.original_name}'
-                return response
-        except StorageFiles.DoesNotExist:
-            raise Http404("File not found")
+    @action(detail=True, methods=['get'], url_path='download')
+    @handle_file_download
+    def download_by_id(self, request, pk=None):
+        """This function downloads a file by ID"""
+        return self.get_object()
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
