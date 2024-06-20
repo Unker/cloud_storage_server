@@ -1,10 +1,9 @@
 import os
 import logging
 
-from django.http import HttpResponse, Http404, JsonResponse, FileResponse
+from django.http import JsonResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import render, redirect
-from django.utils import timezone
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -63,7 +62,6 @@ def custom_register(request):
 class UserViewSet(ModelViewSet):
     """Работа с профилями пользователей"""
     permission_classes = [IsAdminUser]
-    # permission_classes = [AllowAny]
     queryset = UserStorage.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
@@ -143,7 +141,7 @@ class StorageFilesViewSet(ModelViewSet):
     @handle_file_download
     def download_by_id(self, request, pk=None):
         """This function downloads a file by ID"""
-        return self.get_object()
+        return get_object_or_404(StorageFiles, pk=pk)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -155,3 +153,7 @@ class StorageFilesViewSet(ModelViewSet):
         if os.path.exists(file_path):
             os.remove(file_path)
         instance.delete()
+
+    def has_permission_to_download(self, user, file_instance):
+        # Проверка прав доступа: разрешить только администратору или владельцу файла
+        return user.is_superuser or user.is_staff or user == file_instance.owner
