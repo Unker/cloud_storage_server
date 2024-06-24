@@ -15,11 +15,11 @@ import environ
 import os
 
 env = environ.Env()
-environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -34,7 +34,7 @@ CORS_ALLOWED_HOSTS = env('CORS_ALLOWED_HOSTS')
 
 ALLOWED_HOSTS = [
     CORS_ALLOWED_HOSTS,
-    '127.0.0.1'
+    '127.0.0.1',
     'localhost',
 ]
 
@@ -67,14 +67,19 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8080",
-    "http://localhost:8080",
-    'http://localhost:5173',
-    'http://'+CORS_ALLOWED_HOSTS,
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://127.0.0.1:8080",
+#     "http://localhost:8080",
+#     'http://localhost:5173',
+#     'http://'+CORS_ALLOWED_HOSTS,
+# ]
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+
+CORS_ORIGIN_ALLOW_ALL = True if '*' in CORS_ALLOWED_HOSTS else False
+
+CORS_ALLOWED_ORIGINS = CORS_ALLOWED_HOSTS if not CORS_ORIGIN_ALLOW_ALL else []
+
 
 # CORS_ALLOW_ALL_ORIGINS = True
 
@@ -117,10 +122,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('DB_NAME'),
-        'HOST': env('DB_HOST'),
+        'HOST': env('DB_HOST', default='127.0.0.1'),
         'PORT': env('DB_PORT'),
         'USER': env('DB_USER'),
-        'PASSWORD': env('DB_USER_PASSWORD'),
+        'PASSWORD': env('DB_PASSWORD'),
     }
 }
 

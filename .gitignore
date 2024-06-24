@@ -4,5 +4,5 @@ __pycache__/
 *.idea/
 migrations/
 venv/
-.env
+cloud_storage/.env
 user_storage/
