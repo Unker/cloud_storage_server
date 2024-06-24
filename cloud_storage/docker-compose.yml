@@ -12,7 +12,7 @@ services:
 
   web:
     build: .
-#    command: gunicorn cloud_storage.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn cloud_storage.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - ./:/usr/src/app
     ports:

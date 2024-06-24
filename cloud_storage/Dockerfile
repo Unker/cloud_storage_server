@@ -22,5 +22,4 @@ COPY ./requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Запускаем приложение
-#CMD ["gunicorn", "--bind", "0.0.0.0:8000", "cloud_storage.wsgi:application"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "cloud_storage.wsgi:application"]
