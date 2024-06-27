@@ -74,7 +74,7 @@ MIDDLEWARE = [
 #     'http://'+CORS_ALLOWED_HOSTS,
 # ]
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 
 CORS_ORIGIN_ALLOW_ALL = True if '*' in CORS_ALLOWED_HOSTS else False
 
@@ -161,10 +161,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 # статика для nginx
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 STORAGE_PATH = env('STORAGE_PATH')
 
