@@ -6,3 +6,4 @@ migrations/
 venv/
 cloud_storage/.env
 user_storage/
+*.log
