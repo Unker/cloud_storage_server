@@ -24,5 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Запускаем приложение
 CMD ["entrypoint.sh"]
