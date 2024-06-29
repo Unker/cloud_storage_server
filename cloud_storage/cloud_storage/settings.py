@@ -28,7 +28,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY_DJANGO')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG', default='True') == 'True'
+DEBUG = env('DEBUG', default='False') == 'True'
 
 CORS_ALLOWED_HOSTS = env('CORS_ALLOWED_HOSTS')
 

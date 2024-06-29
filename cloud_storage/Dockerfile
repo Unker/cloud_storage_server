@@ -8,8 +8,8 @@ RUN apt-get update \
 WORKDIR /usr/src/app
 
 # set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Копируем файлы проекта
 COPY . /usr/src/app
@@ -25,4 +25,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN python manage.py collectstatic --noinput
 
 # Запускаем приложение
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "cloud_storage.wsgi:application"]
+CMD ["entrypoint.sh"]
