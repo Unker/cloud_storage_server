@@ -1,4 +1,26 @@
 services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  web:
+    build: .
+    command: gunicorn cloud_storage.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./:/usr/src/app
+      - static_volume:/usr/src/app/staticfiles
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+
   nginx:
     build: ./nginx
     ports:
