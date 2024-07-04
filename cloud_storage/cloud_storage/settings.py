@@ -22,11 +22,7 @@ SECRET_KEY = env('SECRET_KEY_DJANGO')
 DEBUG = env('DEBUG', default='False') == 'True'
 
 CORS_ALLOWED_HOSTS = env('CORS_ALLOWED_HOSTS', default='').split(',')
-
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-] + CORS_ALLOWED_HOSTS
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='').split(',')
 
 print(f'ALLOWED_HOSTS = {ALLOWED_HOSTS}')
 
@@ -63,6 +59,8 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 CORS_ORIGIN_ALLOW_ALL = True if '*' in CORS_ALLOWED_HOSTS else False
 
 CORS_ALLOWED_ORIGINS = CORS_ALLOWED_HOSTS if not CORS_ORIGIN_ALLOW_ALL else []
+
+print(f'CORS_ALLOWED_ORIGINS = {CORS_ALLOWED_ORIGINS}')
 
 # CORS_ALLOWED_ORIGINS = [
 #     "http://127.0.0.1:8080",
