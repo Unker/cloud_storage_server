@@ -1,18 +1,23 @@
 FROM python:3.11.4-slim-buster
 
 # Устанавливаем зависимости
-RUN apt-get update \
-    && apt-get install -y gcc libpq-dev
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    netcat \
+    && apt-get clean
+
+ENV APP_HOME=/usr/src/app
 
 # Устанавливаем рабочую директорию
-WORKDIR /usr/src/app
+WORKDIR $APP_HOME
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Копируем файлы проекта
-COPY . /usr/src/app
+COPY . $APP_HOME
 
 # Устанавливаем Python-зависимости
 RUN python -m venv /opt/venv
@@ -24,8 +29,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY ./entrypoint.sh .
+# Совместимость с windows файлами
+RUN sed -i 's/\r$//g' $APP_HOME/entrypoint.sh
+RUN chmod +x $APP_HOME/entrypoint.sh
 
 # Запускаем приложение
-CMD ["entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
