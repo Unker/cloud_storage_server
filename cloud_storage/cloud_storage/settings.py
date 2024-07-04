@@ -28,6 +28,7 @@ ALLOWED_HOSTS = [
     'localhost',
 ] + CORS_ALLOWED_HOSTS
 
+print(f'ALLOWED_HOSTS = {ALLOWED_HOSTS}')
 
 # Application definition
 
