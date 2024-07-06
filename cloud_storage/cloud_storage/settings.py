@@ -54,20 +54,18 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
+valid_csrf_trusted_origins = [host for host in CORS_ALLOWED_HOSTS if host.startswith(('http://', 'https://'))]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000'
+] + valid_csrf_trusted_origins
 
 CORS_ORIGIN_ALLOW_ALL = True if '*' in CORS_ALLOWED_HOSTS else False
 
 CORS_ALLOWED_ORIGINS = CORS_ALLOWED_HOSTS if not CORS_ORIGIN_ALLOW_ALL else []
 
 print(f'CORS_ALLOWED_ORIGINS = {CORS_ALLOWED_ORIGINS}')
-
-# CORS_ALLOWED_ORIGINS = [
-#     "http://127.0.0.1:8080",
-#     "http://localhost:8080",
-#     'http://localhost:5173',
-#     'http://'+CORS_ALLOWED_HOSTS,
-# ]
+print(f'CSRF_TRUSTED_ORIGINS = {CSRF_TRUSTED_ORIGINS}')
 
 # Allow credentials to be included in the requests
 CORS_ALLOW_CREDENTIALS = True
