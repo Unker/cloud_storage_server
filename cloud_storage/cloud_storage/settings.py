@@ -149,10 +149,11 @@ STATIC_URL = "/static/"
 
 # статика для nginx
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+print(f'STATIC_ROOT = {STATIC_ROOT}')
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
 
 STORAGE_PATH = env('STORAGE_PATH')
 
