@@ -10,6 +10,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -71,6 +72,7 @@ class StorageFilesViewSet(ModelViewSet):
     queryset = StorageFiles.objects.all()
     serializer_class = StorageFilesSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]
 
     def get_queryset(self):
         user = self.request.user
