@@ -88,12 +88,15 @@ class StorageFilesViewSet(ModelViewSet):
         serializer.save(owner=self.request.user)
 
     def create(self, request, *args, **kwargs):
+        logger.debug("Start file upload")
         file = request.data.get('file', None)
         if file is None:
+            logger.error("File field is null")
             return Response(
                 {"detail": "File field cannot be null."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        logger.debug(f"File uploaded: {file.name}")
         return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'])
