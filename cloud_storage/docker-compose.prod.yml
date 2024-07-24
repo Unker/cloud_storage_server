@@ -15,9 +15,9 @@ services:
   web:
     build: .
     command: >
-      sh -c "
+      bash -c "
+      python manage.py makemigrations storage &&
       python manage.py migrate --noinput &&
-      python manage.py createsuperuser --noinput --username ${DJANGO_SUPERUSER_USERNAME} --email ${DJANGO_SUPERUSER_EMAIL} || true &&
       gunicorn --timeout 120 cloud_storage.wsgi:application --bind 0.0.0.0:8000
       "
     volumes:
