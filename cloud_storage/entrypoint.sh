@@ -11,8 +11,4 @@ then
     echo "PostgreSQL started"
 fi
 
-python manage.py flush --no-input
-python manage.py makemigrations
-python manage.py migrate --no-input
-
-exec gunicorn cloud_storage.wsgi:application --bind 0.0.0.0:8000
+exec gunicorn --timeout 120 cloud_storage.wsgi:application --bind 0.0.0.0:8000
