@@ -1,10 +1,10 @@
-FROM python:3.11.9-slim-buster
+FROM python:3.11.9-slim
 
 # Устанавливаем зависимости
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
-    netcat \
+    netcat-openbsd \
     && apt-get clean
 
 ENV APP_HOME=/usr/src/app
@@ -32,8 +32,9 @@ RUN chmod +x $APP_HOME/entrypoint.sh
 COPY . $APP_HOME
 
 # Collect static files
-RUN python manage.py collectstatic --noinput
-COPY ./staticfiles $APP_HOME/staticfiles/
+# WORKDIR .
+# RUN python manage.py collectstatic --noinput
+# COPY ./staticfiles $APP_HOME/staticfiles/
 
 # Запускаем приложение
 ENTRYPOINT ["./entrypoint.sh"]
