@@ -1,5 +1,5 @@
 services:
-  web:
+  backend:
     build: .
     command: >
       bash -c "
@@ -22,7 +22,7 @@ services:
     volumes:
       - static_volume:/usr/src/app/staticfiles
     depends_on:
-      - web
+      - backend
     networks:
       - app-network
 
