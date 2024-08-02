@@ -205,7 +205,7 @@ def test_partial_update_file(client, users, storage_files, cleanup):
         'comment': 'new comment'
     }
 
-    response = client.patch(url, data)
+    response = client.patch(url, data, format='multipart')
     assert response.status_code == status.HTTP_200_OK
     assert response.data['comment'] == data['comment']
     file.refresh_from_db()
