@@ -1,34 +1,26 @@
-services:
-  backend:
-    build: .
-    command: >
-      bash -c "
-      gunicorn --timeout 120 cloud_storage.wsgi:application --bind 0.0.0.0:8000
-      "
-    volumes:
-      - ./:/usr/src/app
-      - static_volume:/usr/src/app/staticfiles
-    env_file:
-      - ./.env
-    ports:
-      - "8000:8000"
-    networks:
-      - app-network
-
-  nginx:
-    build: ./nginx
-    ports:
-      - "80:80"
-    volumes:
-      - static_volume:/usr/src/app/staticfiles
-    depends_on:
-      - backend
-    networks:
-      - app-network
-
 networks:
   app-network:
-    driver: bridge
 
-volumes:
-  static_volume:
+services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - './cloud_storage/nginx/nginx.conf:/etc/nginx/nginx.conf'
+      - './cloud_storage/nginx/server.conf:/etc/nginx/conf.d/server.conf'
+      - '/etc/letsencrypt:/etc/letsencrypt'
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./cloud_storage
+    networks:
+      - app-network
+    volumes:
+      - ./users_files:/usr/src/app/users_files
