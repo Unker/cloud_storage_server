@@ -2,7 +2,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.idea/
-migrations/
 venv/
 cloud_storage/.env
 user_storage/
