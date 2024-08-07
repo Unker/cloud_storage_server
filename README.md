@@ -54,7 +54,7 @@
 #### <ins>Клонирование проекта:</ins> <a name="клонирование-проекта"></a>
    ```bash
    git clone https://github.com/Unker/cloud_storage_server.git
-   cd cloud_storage_server
+   cd cloud_storage_server/cloud_storage/
    ```
    
 #### <ins>Настройка переменных окружения:</ins> <a name="настройка-переменных-окружения"></a>
@@ -96,7 +96,10 @@
 #### <ins>Настройка Django:</ins>
 1. Создайте виртуальное окружение и запустите его. В каталоге с проектом выполните команды:
     ```bash
+    cd cloud_storage/   (если еще не в каталоге с проектом)
     python3 -m venv venv
+    ```
+    ```bash
     source venv/bin/activate
     ```
 
