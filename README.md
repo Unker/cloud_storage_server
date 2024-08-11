@@ -57,18 +57,18 @@ cd cloud_storage_server/cloud_storage/
 ```
    
 #### <ins>Настройка переменных окружения:</ins> <a name="настройка-переменных-окружения"></a>
-1. Создайте .env файл и откройте на редактирование:
-   ```bash
-   touch .env
-   nano .env
-   ```
-   
-1. Сгенерируйте SECRET_KEY в Django:
+1. Сгенерируйте SECRET_KEY для Django:
    ```bash
    python3 manage.py shell
    from django.core.management import utils
    utils.get_random_secret_key()
    exit()
+   ```
+
+1. Создайте .env файл и откройте на редактирование:
+   ```bash
+   touch .env
+   nano .env
    ```
    
 1. Заполните .env следующим содержимым:
