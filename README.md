@@ -1,63 +1,61 @@
-Cloud storage server
+Cloud Storage Server
 ===============
 
-Серверная часть приложения "облачное хранилище". Приложение позволяет пользователям загружать, отправлять, скачивать файлы.
+This is the server-side application for "Cloud Storage". The application allows users to upload, send, and download files.
 
-***Содержание:***
+***Contents:***
 
-- [Технологии](#технологии)
-- [Начало работы](#начало-работы)
-  - [Настройка сервера](#настройка-сервера)
-    - [Настройка БД](#настройка-бд)
-    - [Клонирование проекта](#клонирование-проекта)
-    - [Настройка переменных окружения](#настройка-переменных-окружения)
-  - [Ручной запуск проекта](#ручной-запуск-проекта)
-  - [Запуск проекта через Docker Compose (рекомендуется)](#run-docker)
-- [Тестирование](#тестирование)
-- [To do](#to-do)
+- [Technologies](#technologies)
+- [Getting Started](#getting-started)
+  - [Server Setup](#server-setup)
+    - [Database Setup](#database-setup)
+    - [Cloning the Project](#cloning-the-project)
+    - [Setting Environment Variables](#setting-environment-variables)
+  - [Manual Project Launch](#manual-project-launch)
+  - [Running the Project with Docker Compose (recommended)](#run-with-docker)
+- [Testing](#testing)
+- [To Do](#to-do)
 
+# Technologies <a name="technologies"></a>
 
-# Технологии <a name="технологии"></a>
+The server is implemented in [Python](https://www.python.org/) using the [Django](https://www.djangoproject.com/) framework and the [PostgreSQL](https://www.postgresql.org/) database system.
 
-Сервер реализован на языке [Python](https://www.python.org/) с использованием фреймворка 
-[Django](https://www.djangoproject.com/) и СУБД [PostgreSQL](https://www.postgresql.org/)
+# Getting Started <a name="getting-started"></a>
 
+### Server Setup <a name="server-setup"></a>
 
-# Начало работы <a name="начало-работы"></a>
-
-### Настройка сервера <a name="настройка-сервера"></a>
-
-#### <ins>Настройка БД:</ins> <a name="настройка-бд"></a>
-1. Установите PostgreSQL:
+#### <ins>Database Setup:</ins> <a name="database-setup"></a>
+1. Install PostgreSQL:
     ```bash
     sudo apt install postgresql
     ```
-   
-1. Создайте суперпользователя БД:
+
+1. Create a database superuser:
     ```bash
     sudo su postgres
     psql
-    CREATE USER <имя_пользователя> WITH SUPERUSER;
-    ALTER USER <имя_пользователя> WITH PASSWORD <пароль>;
-    CREATE DATABASE <имя_пользователя>;
+    CREATE USER <username> WITH SUPERUSER;
+    ALTER USER <username> WITH PASSWORD '<password>';
+    CREATE DATABASE <username>;
     \q
     exit
     ```
 
-1. Зайдите в управление БД от суперпользователя и создайте БД для приложения:
+1. Access the database management console as the superuser and create a database for the application:
     ```bash
     psql
     CREATE DATABASE cloud_storage_db;
     exit
     ```
-#### <ins>Клонирование проекта:</ins> <a name="клонирование-проекта"></a>
+
+#### <ins>Cloning the Project:</ins> <a name="cloning-the-project"></a>
 ```bash
 git clone https://github.com/Unker/cloud_storage_server.git
 cd cloud_storage_server/cloud_storage/
 ```
-   
-#### <ins>Настройка переменных окружения:</ins> <a name="настройка-переменных-окружения"></a>
-1. Сгенерируйте SECRET_KEY для Django:
+
+#### <ins>Setting Environment Variables:</ins> <a name="setting-environment-variables"></a>
+1. Generate a SECRET_KEY for Django:
    ```bash
    python3 manage.py shell
    from django.core.management import utils
@@ -65,13 +63,13 @@ cd cloud_storage_server/cloud_storage/
    exit()
    ```
 
-1. Создайте .env файл и откройте на редактирование:
+1. Create a .env file and open it for editing:
    ```bash
    touch .env
    nano .env
    ```
-   
-1. Заполните .env следующим содержимым:
+
+1. Populate the .env file with the following content:
    ```
    SECRET_KEY_DJANGO='django-insecure-xxx'
    CORS_ALLOWED_HOSTS='http://localhost:3000,http://109.71.245.96:3000'
@@ -79,90 +77,90 @@ cd cloud_storage_server/cloud_storage/
    DB_NAME=cloud_storage_db
    DB_HOST=109.71.245.96
    DB_PORT=5432
-   DB_USER=<имя_суперпользователя>
-   DB_PASSWORD=<пароль_суперпользователя>
+   DB_USER=<superuser_name>
+   DB_PASSWORD=<superuser_password>
    STORAGE_PATH=users_files
    ```
-    - Вместо `xxx` в `SECRET_KEY_DJANGO` вставьте ключ, полученный в предыдущем действии.
-    - Для полей `CORS_ALLOWED_HOSTS` и `ALLOWED_HOSTS` вместо `109.71.245.96` укажите адреса вашего frontend
-    - Для поля `DB_HOST` - текущий адрес сервера
-    - Для `DB_USER` - имя вашего суперпользователя
-    - Для `DB_PASSWORD` - пароль вашего суперпользователя
+    - Replace `xxx` in `SECRET_KEY_DJANGO` with the key created in the previous step.
+    - For `CORS_ALLOWED_HOSTS` and `ALLOWED_HOSTS`, replace `109.71.245.96` with your frontend addresses.
+    - For `DB_HOST`, use the current server address.
+    - For `DB_USER`, use your superuser name.
+    - For `DB_PASSWORD`, use your superuser password.
 
-1. Редактирование настройки nginx. Замените значение в параметре `server_name` на ip адрес вашего сервера
+1. Edit the nginx configuration. Replace the `server_name` value with the IP address of your server:
     ```bash
     nano nginx/server.backend.conf
     ```
 
-   
+## Manual Project Launch <a name="manual-project-launch"></a>
 
-## Ручной запуск проекта <a name="начало-работы"></a>
-
-#### <ins>Настройка Django:</ins>
-1. Создайте виртуальное окружение и запустите его. В каталоге с проектом выполните команды:
+#### <ins>Django Setup:</ins>
+1. Create and activate a virtual environment. In the project directory, run:
     ```bash
-    cd cloud_storage/   (если еще не в каталоге с проектом)
+    cd cloud_storage_server/   (if not already in the project directory)
+    ```
+    ```bash
     python3 -m venv venv
     ```
     ```bash
     source venv/bin/activate
     ```
 
-1. Установите зависимости:
+1. Install dependencies:
     ```bash
     pip install -r requirements.txt
     ```
 
-1. Сделайте миграции 
+1. Apply migrations:
     ```bash
     python manage.py migrate
     ```
 
-1. Создайте суперпользователя для управления Django приложением
+1. Create a superuser to manage the Django application:
     ```bash
     python manage.py createsuperuser
     ```
 
-1. Сборка статики на сервере:
+1. Collect static files on the server:
     ```bash
     python manage.py collectstatic
     ```
 
-#### <ins>Запуск приложения:</ins>
-1. Запустите сервер:
+#### <ins>Running the Application:</ins>
+1. Start the server:
     ```bash
     python manage.py runserver 0.0.0.0:8000
     ```
-***Внимание! Запуск сервера выполнять внутри окружения Python, созданного выше***
+***Note: Ensure the server is started within the Python virtual environment created above.***
 
-## Запуск проекта через Docker Compose <a name="run-docker"></a>
-1. [Установите Docker](https://docs.docker.com/engine/install/ubuntu/)
-1. Запустите систему сборки контейнеров:
+## Running the Project with Docker Compose <a name="run-with-docker"></a>
+
+1. [Install Docker](https://docs.docker.com/engine/install/ubuntu/)
+1. Start the container build system:
     ```bash
     docker compose -f docker-compose.prod.yml up -d --build
     ```
 
-1. Проверьте, что контейнер запущен:
+1. Check that the containers are running:
     ```bash
     docker ps
     ```
 
-1. Должны быть активны образы: `nginx:stable-alpine` и `cloud_storage_server-backend`
+1. The `nginx:stable-alpine` and `cloud_storage_server-backend` images should be active.
 
+## Testing <a name="testing"></a>
 
-## Тестирование <a name="тестирование"></a>
-
-Проект покрыт юнит-тестами. Для их запуска выполните действия ниже
-1. Установите дополнительные зависимости:
+The project is covered by unit tests. To run the tests, follow the steps below:
+1. Install additional dependencies:
     ```bash
     pip install -r requirements-dev.txt
     ```
 
-1. Для их запуска выполните команду:
+1. Run the tests with the command:
     ```bash
     pytest
     ```
 
-## Todo <a name="to-do"></a>
+## To Do <a name="to-do"></a>
 
-Настроить CI\CD
+Set up CI/CD.
