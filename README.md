@@ -9,6 +9,7 @@ This is the server-side application for "Cloud Storage". The application allows 
 - [Getting Started](#getting-started)
   - [Server Setup](#server-setup)
     - [Database Setup](#database-setup)
+    - [Database Access](#database-access)
     - [Cloning the Project](#cloning-the-project)
     - [Setting Environment Variables](#setting-environment-variables)
   - [Manual Project Launch](#manual-project-launch)
@@ -47,6 +48,32 @@ The server is implemented in [Python](https://www.python.org/) using the [Django
     CREATE DATABASE cloud_storage_db;
     exit
     ```
+
+#### <ins>Database Access:</ins> <a name="database-access"></a>
+1. Configure PostgreSQL to accept connections from your local IP:
+    ```bash
+    sudo nano /etc/postgresql/16/main/postgresql.conf
+    ```
+    then set `listen_addresses` and save file
+    ```
+    listen_addresses = 'localhost'
+    ```
+
+1. Providing access to all IP addresses on the Docker network
+    ```bash
+    sudo nano /etc/postgresql/16/main/pg_hba.conf
+    ```
+    then add this line and save file
+    ```
+    host    all             all             172.18.0.0/16           md5
+    ```
+    This rule will allow all containers on the Docker network to connect to PostgreSQL using password access (md5 method). If you need SSL encryption, you can replace md5 with scram-sha-256.
+
+1. Restart PostgreSQL for the changes to take effect
+    ```bash
+    sudo systemctl restart postgresql
+    ```
+
 
 #### <ins>Cloning the Project:</ins> <a name="cloning-the-project"></a>
 ```bash
